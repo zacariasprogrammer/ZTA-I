@@ -547,6 +547,17 @@
       new THREE.MeshStandardMaterial({ color: SKIN, roughness: 0.7 }));
     head.position.y = 1.82; head.castShadow = true;
     g.add(head);
+    // face: eyes + mouth on the front (+z, the way the ped walks)
+    var eyeMat = new THREE.MeshStandardMaterial({ color: 0x14141c, roughness: 0.4 });
+    [-0.09, 0.09].forEach(function (x) {
+      var eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), eyeMat);
+      eye.position.set(x, 1.86, 0.23);
+      g.add(eye);
+    });
+    var mouth = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.025, 0.03),
+      new THREE.MeshStandardMaterial({ color: 0x7a3b2e, roughness: 0.7 }));
+    mouth.position.set(0, 1.72, 0.24);
+    g.add(mouth);
     return g;
   }
   function makeCopMesh() {
