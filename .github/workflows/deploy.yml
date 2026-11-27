@@ -21,8 +21,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check game JS syntax
         run: |
-          python3 -c "import re; html=open('index.html').read(); m=re.search(r'<script>(.*)</script>', html, re.S); open('/tmp/game.js','w').write(m.group(1))"
-          node --check /tmp/game.js
+          python3 -c "import re; html=open('index.html').read(); blocks=re.findall(r'<script>(.*?)</script>', html, re.S); [open('/tmp/game%d.js'%i,'w').write(b) for i,b in enumerate(blocks)]; print('inline script blocks:', len(blocks))"
+          for f in /tmp/game*.js; do node --check "$f"; done
 
   deploy:
     needs: check
