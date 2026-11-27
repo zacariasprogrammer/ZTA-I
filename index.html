@@ -67,6 +67,13 @@
     padding: 6px 12px; font-size: 13px; color: #aab8d0; pointer-events: none; white-space: nowrap;
   }
   #lock-hint.hidden { display: none; }
+  #unlock-btn {
+    position: absolute; left: 10px; top: 10px; z-index: 5;
+    padding: 8px 14px; font-size: 13px; font-weight: 700; letter-spacing: 0;
+    background: rgba(5, 5, 16, .8); color: #00e5ff; border: 1px solid #1e2a4a;
+    border-radius: 8px; box-shadow: none; cursor: pointer;
+  }
+  #unlock-btn.hidden { display: none; }
   .overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -116,6 +123,7 @@
     <canvas id="game" width="800" height="600"></canvas>
     <canvas id="mini" width="150" height="112"></canvas>
     <div id="lock-hint" class="hidden">Click the game — mouse to look</div>
+    <button id="unlock-btn" class="hidden">Free mouse (Esc)</button>
     <div class="overlay" id="start-screen">
       <h2 class="blue">ZTA I</h2>
       <p>Real 3D. You're in Zaqui City — a made-up city, not a real place.
@@ -124,7 +132,7 @@
       Bullets are real rays: a wall between you and the target stops the shot. Physics respected.</p>
       <label><input type="checkbox" id="parents-mode"> Parents Mode (no shooting)</label>
       <button id="start-btn">PLAY</button>
-      <p style="font-size:12px;color:#5d6b85" id="controls-line">Click the game to lock your mouse, move it to look &middot; WASD move, Shift run &middot; E enter / exit car &middot; click / Space shoot &middot; P pause<br>No sexual content, ever. That's the rule.</p>
+      <p style="font-size:12px;color:#5d6b85" id="controls-line">Click the game to lock your mouse, move it to look &middot; WASD move, Shift run &middot; E enter / exit car &middot; click / Space shoot &middot; P pause &middot; Esc (or the Free mouse button) frees your mouse<br>No sexual content, ever. That's the rule.</p>
     </div>
     <div class="overlay hidden" id="over-screen">
       <h2 id="over-title">WASTED</h2>
@@ -616,6 +624,15 @@
       locked = document.pointerLockElement === canvas;
       document.getElementById('lock-hint').classList.toggle('hidden',
         locked || state !== 'playing' || window.matchMedia('(pointer: coarse)').matches);
+      // the button only exists while the mouse is locked; losing the lock
+      // (Esc, or the button) pauses the game so nothing kills you meanwhile
+      document.getElementById('unlock-btn').classList.toggle('hidden',
+        !locked || state !== 'playing');
+      if (!locked && state === 'playing' && !paused) togglePause();
+    });
+    // the button frees the mouse: pause + unlock in one tap
+    document.getElementById('unlock-btn').addEventListener('click', function () {
+      if (state === 'playing' && !paused) togglePause();
     });
     document.addEventListener('mousemove', function (e) {
       if (locked && state === 'playing' && !paused) {
@@ -1113,6 +1130,7 @@
     if (state !== 'playing') return;
     paused = !paused;
     if (paused && document.pointerLockElement === canvas) document.exitPointerLock();
+    document.getElementById('lock-hint').textContent = paused ? 'Paused — press P to resume' : 'Click the game — mouse to look';
   }
   function startGame() {
     parentsMode = document.getElementById('parents-mode').checked;
